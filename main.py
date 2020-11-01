@@ -31,7 +31,7 @@ BoxLayout:
             text: 'Stop'
     
     Label:
-        text: 'Play: CC#1 00\\nStop: CC#1 127\\nRestart: CC#2 XX ' 
+        text: 'Play: CC#1 00\\nStop: CC#1 127\\nRestart: CC#2 127\\nVol: CC#3 0-127 ' 
 
 """
 
