@@ -6,7 +6,6 @@ from kivy.app import App
 class MidiControl:
     def __init__(self):
         self.midi_channel = None
-        self.midi_in_port_name = None
         self.midi_in_names = None  # Names of all of the midi input ports
         self.midi_in_port = None
 
@@ -38,3 +37,5 @@ class MidiControl:
         if self.midi_in_port:
             for msg in self.midi_in_port.iter_pending():
                 print(msg)
+
+# todo: check for valid messages using the midi ch, call stop, play restart or volume.
