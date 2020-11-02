@@ -3,8 +3,11 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.audio import SoundLoader
+from kivy.clock import Clock
 
 from pathlib import Path
+
+from midi_control import MidiControl
 
 kv = """
 RootBoxLayout:
@@ -15,10 +18,13 @@ RootBoxLayout:
         Label:
             text: 'Midi Device & Channel'
         Spinner:
-            text: 'Midi Device'
+            id: midi_devices
+            text: 'Select Midi Device'
+            on_text: app.mc.set_midi_port(self.text)
         Spinner:
-            text: 'Midi Ch'
+            text: 'Select Midi Channel'
             values: [str(n) for n in range(1, 17)]
+            on_text: app.mc.set_midi_channel(self.text)
     Label:
         id: file
         text: 'Background Track Player'  # Replace with filename
@@ -80,12 +86,23 @@ class RootBoxLayout(BoxLayout):
 
 
 class BackingTrackPlayerApp(App):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.mc = MidiControl()
+
     def build(self):
         Window.bind(on_dropfile=self._dropfile_action)
         return Builder.load_string(kv)
 
     def _dropfile_action(self, window, path):
         self.root.set_backing_track(path.decode())
+
+    def on_start(self):
+        names = self.mc.get_midi_ports()
+        self.root.ids.midi_devices.values = names
+        Clock.schedule_interval(self.mc.read_midi_callback, .1)
+
+
 
 
 BackingTrackPlayerApp().run()
