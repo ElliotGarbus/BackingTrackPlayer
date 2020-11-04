@@ -35,7 +35,7 @@ class MidiControl:
     def set_midi_channel(self, ch: str):
         self.midi_channel = int(ch) - 1
 
-    def read_midi_callback(self, dt):
+    def read_midi_callback(self, _):  # called from Clock.schedule_interval, does not use dt
         app = App.get_running_app()
         p = app.root
         if self.midi_in_port:
@@ -50,4 +50,3 @@ class MidiControl:
                         p.restart()
                     elif msg.control == 3:  # Adjust playback volume
                         p.set_volume(msg.value)
-

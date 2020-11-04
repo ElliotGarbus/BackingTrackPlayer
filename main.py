@@ -115,14 +115,14 @@ class BackingTrackPlayerApp(App):
     def on_start(self):
         names = self.mc.get_midi_ports()
         self.root.ids.midi_devices.values = names
-        input = self.config.getdefault('MIDI', 'input', 'None')
+        m_input = self.config.getdefault('MIDI', 'input', 'None')
         ch = self.config.get('MIDI', 'channel')
         song = self.config.get('Track', 'song')
-        if input in names:
-            self.root.set_backing_track(song)
-            self.mc.set_midi_port(input)
+        if m_input in names:
+            self.root.set_backing_track(song)  # before set midi ports - so errors can show in track area
+            self.mc.set_midi_port(m_input)
             self.mc.midi_channel = int(ch)
-            self.root.ids.midi_devices.text = input
+            self.root.ids.midi_devices.text = m_input
             self.root.ids.midi_ch.text = str(int(ch) + 1)
         Clock.schedule_interval(self.mc.read_midi_callback, .1)
 
