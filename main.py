@@ -1,3 +1,4 @@
+import configstartup
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.core.window import Window
@@ -22,6 +23,7 @@ RootBoxLayout:
             text: 'Select Midi Device'
             on_text: app.mc.set_midi_port(self.text)
         Spinner:
+            id: midi_ch
             text: 'Select Midi Channel'
             values: [str(n) for n in range(1, 17)]
             on_text: app.mc.set_midi_channel(self.text)
@@ -54,12 +56,15 @@ class RootBoxLayout(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.track = None
+        self.track_path = None  # holds the name of the track
 
     def set_backing_track(self, path):
         self.track = SoundLoader.load(path)
         if not self.track:
             self.ids.file.text = self.error_msg
+            self.track_path = None
         else:
+            self.track_path = path
             self.ids.file.text = Path(path).stem
             self.track.loop = True
 
@@ -98,6 +103,8 @@ class BackingTrackPlayerApp(App):
         self.mc = MidiControl()
 
     def build(self):
+        self.title = 'Backing Track Player V1.0'
+        self.use_kivy_settings = False
         Window.bind(on_dropfile=self._dropfile_action)
         return Builder.load_string(kv)
 
@@ -107,9 +114,31 @@ class BackingTrackPlayerApp(App):
     def on_start(self):
         names = self.mc.get_midi_ports()
         self.root.ids.midi_devices.values = names
+        input = self.config.getdefault('MIDI', 'input', 'None')
+        ch = self.config.get('MIDI', 'channel')
+        song = self.config.get('Track', 'song')
+        if input in names:
+            self.mc.set_midi_port(input)
+            self.mc.midi_channel = int(ch)
+            self.root.ids.midi_devices.text = input
+            self.root.ids.midi_ch.text = str(int(ch) + 1)
+            self.root.set_backing_track(song)
         Clock.schedule_interval(self.mc.read_midi_callback, .1)
 
+    def open_settings(self, *largs):  # kivy control panel will not open
+        pass
 
+    def build_config(self, config):
+        config.setdefaults('MIDI', {'input': 'None',
+                                    'channel': 'None'})
+        config.setdefaults('Track', {'song': 'None'})
+
+    def on_stop(self):
+        if self.mc.midi_in_port and self.mc.midi_channel is not None and self.root.track_path:
+            self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
+            self.config.set('MIDI', 'channel', self.mc.midi_channel)
+            self.config.set('Track', 'song', self.root.track_path)
+            self.config.write()
 
 
 BackingTrackPlayerApp().run()
