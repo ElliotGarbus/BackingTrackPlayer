@@ -28,7 +28,7 @@ class MidiControl:
         try:
             self.midi_in_port = mido.open_input(input_port)
         except RuntimeError as e:
-            print(f'APPLICATION: set_midi(): {e}')
+            print(f'APPLICATION: set_midi_port(): {e}')
 
     def set_midi_channel(self, ch: str):
         self.midi_channel = int(ch) - 1
@@ -39,14 +39,13 @@ class MidiControl:
         if self.midi_in_port:
             for msg in self.midi_in_port.iter_pending():
                 if msg.type == 'control_change' and msg.channel == self.midi_channel:
-                    if msg.control == 1:
+                    if msg.control == 1:  # play or stop
                         if msg.value == 0:
                             p.play()
                         elif msg.value == 127:
                             p.stop()
-                    elif msg.control == 2 and msg.value == 127:
+                    elif msg.control == 2 and msg.value == 127:  # Restart
                         p.restart()
-                    elif msg.control == 3:
-                        print(f'volume {msg.value}')
+                    elif msg.control == 3:  # Adjust playback volume
                         p.set_volume(msg.value)
 
