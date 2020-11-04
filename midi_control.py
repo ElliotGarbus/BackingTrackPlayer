@@ -27,8 +27,10 @@ class MidiControl:
             self.midi_in_port = None
         try:
             self.midi_in_port = mido.open_input(input_port)
-        except RuntimeError as e:
+        except (RuntimeError, OSError) as e:
             print(f'APPLICATION: set_midi_port(): {e}')
+            app = App.get_running_app()
+            app.root.ids.file.text = 'Error: Cannot connect to MIDI'
 
     def set_midi_channel(self, ch: str):
         self.midi_channel = int(ch) - 1

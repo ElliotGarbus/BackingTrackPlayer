@@ -119,11 +119,11 @@ class BackingTrackPlayerApp(App):
         ch = self.config.get('MIDI', 'channel')
         song = self.config.get('Track', 'song')
         if input in names:
+            self.root.set_backing_track(song)
             self.mc.set_midi_port(input)
             self.mc.midi_channel = int(ch)
             self.root.ids.midi_devices.text = input
             self.root.ids.midi_ch.text = str(int(ch) + 1)
-            self.root.set_backing_track(song)
         Clock.schedule_interval(self.mc.read_midi_callback, .1)
 
     def open_settings(self, *largs):  # kivy control panel will not open
