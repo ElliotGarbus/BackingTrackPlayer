@@ -78,6 +78,7 @@ class RootBoxLayout(BoxLayout):
     def stop(self):
         try:
             self.track.stop()
+            self.ids.play_toggle.state = 'normal'
         except AttributeError:
             self.ids.file.text = self.error_msg
 
