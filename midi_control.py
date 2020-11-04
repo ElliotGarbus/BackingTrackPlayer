@@ -23,7 +23,7 @@ class MidiControl:
             self.midi_in_port = None
             return
         if self.midi_in_port:
-            self.close_ports()
+            self.midi_in_port.close()
             self.midi_in_port = None
         try:
             self.midi_in_port = mido.open_input(input_port)
@@ -34,8 +34,19 @@ class MidiControl:
         self.midi_channel = int(ch) - 1
 
     def read_midi_callback(self, dt):
+        app = App.get_running_app()
+        p = app.root
         if self.midi_in_port:
             for msg in self.midi_in_port.iter_pending():
-                print(msg)
+                if msg.type == 'control_change' and msg.channel == self.midi_channel:
+                    if msg.control == 1:
+                        if msg.value == 0:
+                            p.play()
+                        elif msg.value == 127:
+                            p.stop()
+                    elif msg.control == 2 and msg.value == 127:
+                        p.restart()
+                    elif msg.control == 3:
+                        print(f'volume {msg.value}')
+                        p.set_volume(msg.value)
 
-# todo: check for valid messages using the midi ch, call stop, play restart or volume.

@@ -66,6 +66,7 @@ class RootBoxLayout(BoxLayout):
     def play(self):
         try:
             self.track.play()
+            self.ids.play_toggle.state = 'down'
         except AttributeError:
             self.ids.file.text = self.error_msg
 
@@ -81,6 +82,12 @@ class RootBoxLayout(BoxLayout):
                 self.ids.play_toggle.state = 'down'
             else:
                 self.track.play()
+        except AttributeError:
+            self.ids.file.text = self.error_msg
+
+    def set_volume(self, v):  # v is from 0 to 127
+        try:
+            self.track.volume = v/127
         except AttributeError:
             self.ids.file.text = self.error_msg
 
