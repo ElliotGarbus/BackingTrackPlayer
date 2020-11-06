@@ -85,9 +85,9 @@ class RootBoxLayout(BoxLayout):
     def restart(self):
         try:
             if self.track.state == 'stop':
-                self.ids.play_toggle.state = 'down'
+                self.ids.play_toggle.state = 'down' # change is state cause track to play
             else:
-                self.track.play()
+                self.track.seek(0)
         except AttributeError:
             self.ids.file.text = self.error_msg
 
