@@ -88,6 +88,7 @@ class RootBoxLayout(BoxLayout):
                 self.ids.play_toggle.state = 'down' # change is state cause track to play
             else:
                 self.track.seek(0)
+                self.track.play()
         except AttributeError:
             self.ids.file.text = self.error_msg
 
