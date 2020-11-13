@@ -143,7 +143,6 @@ class BackingTrackPlayerApp(App):
             s = defaultpath
         return super().get_application_config(defaultpath=s)
 
-
     def on_stop(self):
         if self.mc.midi_in_port and self.mc.midi_channel is not None and self.root.track_path:
             self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
