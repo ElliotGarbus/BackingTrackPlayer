@@ -1,19 +1,17 @@
 # -*- mode: python -*-
 
-
 import os
 from kivy_deps import sdl2, glew
 
 spec_root = os.path.abspath(SPECPATH)
 block_cipher = None
-app_name = 'Matthews Effects Editor'
-win_icon = '../Images/me_app_design_icon.ico'
+app_name = 'Backing Track Player'
+win_icon = '../icons8_refresh_64_icon.ico'
 
 a = Analysis(['../main.py'],
              pathex=[spec_root],
-             datas=[('../*.kv', '.'),
-                    ('../Images/*.png', './Images')],
-             hiddenimports=['win32timezone'],
+             datas=[],
+             hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
