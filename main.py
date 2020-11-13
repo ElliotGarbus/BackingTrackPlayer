@@ -85,7 +85,7 @@ class RootBoxLayout(BoxLayout):
     def restart(self):
         try:
             if self.track.state == 'stop':
-                self.ids.play_toggle.state = 'down' # change is state cause track to play
+                self.ids.play_toggle.state = 'down'  # change is state cause track to play
             else:
                 self.track.seek(0)
                 self.track.play()
