@@ -5,6 +5,7 @@ from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
+from kivy.utils import platform
 
 from pathlib import Path
 
@@ -134,6 +135,14 @@ class BackingTrackPlayerApp(App):
         config.setdefaults('MIDI', {'input': 'None',
                                     'channel': 'None'})
         config.setdefaults('Track', {'song': 'None'})
+
+    def get_application_config(self, defaultpath='%(appdir)s/%(appname)s.ini'):
+        if platform == 'macosx':  # mac will not write into app folder
+            s = '~/.%(appname)s.ini'
+        else:
+            s = defaultpath
+        return super().get_application_config(defaultpath=s)
+
 
     def on_stop(self):
         if self.mc.midi_in_port and self.mc.midi_channel is not None and self.root.track_path:
