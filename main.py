@@ -55,10 +55,6 @@ RootBoxLayout:
             on_state:
                 if self.state == 'down': root.play()
                 if self.state == 'normal': root.stop()
-
-    # Label:
-    #     size_hint_y: .25
-    #     text: 'Play: CC#1 00\\nStop: CC#1 127\\nRestart: CC#2 127\\nVol: CC#3 0-127 ' 
     GridLayout:
         size_hint_y: .3
         cols: 2
@@ -85,8 +81,6 @@ RootBoxLayout:
             text: 'Drop Backing Track File in Window'
         Label:
             text: 'Spacebar to Toggle Play/Stop'
-    
-
 """
 
 
