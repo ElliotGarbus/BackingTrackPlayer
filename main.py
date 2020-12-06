@@ -78,7 +78,7 @@ RootBoxLayout:
         size_hint_y: None
         height: dp(48)
         Label:
-            text: 'Drop Backing Track File in Window'
+            text: 'Drop Backing-Track File in Window'
         Label:
             text: 'Spacebar to Toggle Play/Stop'
 """
