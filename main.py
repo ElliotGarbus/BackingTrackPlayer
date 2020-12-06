@@ -12,6 +12,18 @@ from pathlib import Path
 from midi_control import MidiControl
 
 kv = """
+<LeftLabel@Label>:
+    text_size: self.size
+    halign: 'right'
+    valign: 'center' 
+    padding: dp(2), dp(2)
+
+<RightLabel@Label>:
+    text_size: self.size
+    halign: 'left'
+    valign: 'center' 
+    padding: dp(2), dp(2)
+
 RootBoxLayout:
     orientation: 'vertical'
     BoxLayout:
@@ -44,9 +56,36 @@ RootBoxLayout:
                 if self.state == 'down': root.play()
                 if self.state == 'normal': root.stop()
 
-    Label:
-        size_hint_y: .25
-        text: 'Play: CC#1 00\\nStop: CC#1 127\\nRestart: CC#2 127\\nVol: CC#3 0-127 ' 
+    # Label:
+    #     size_hint_y: .25
+    #     text: 'Play: CC#1 00\\nStop: CC#1 127\\nRestart: CC#2 127\\nVol: CC#3 0-127 ' 
+    GridLayout:
+        size_hint_y: .3
+        cols: 2
+        LeftLabel:
+            text: 'Play:'
+        RightLabel:
+            text: 'CC#1 0'
+        LeftLabel:
+            text: 'Stop:'
+        RightLabel:
+            text: 'CC#1 127'
+        LeftLabel:
+            text: 'Restart:'
+        RightLabel:
+            text: 'CC#2 127'
+        LeftLabel:
+            text: 'Volume:'
+        RightLabel:
+            text: 'CC#3 0-127'
+    BoxLayout:
+        size_hint_y: None
+        height: dp(48)
+        Label:
+            text: 'Drop Backing Track File in Window'
+        Label:
+            text: 'Spacebar to Toggle Play/Stop'
+    
 
 """
 
