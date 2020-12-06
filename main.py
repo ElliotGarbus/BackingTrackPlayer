@@ -58,6 +58,16 @@ class RootBoxLayout(BoxLayout):
         super().__init__(**kwargs)
         self.track = None
         self.track_path = None  # holds the name of the track
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+
+    def _keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if keycode[1] == 'spacebar':  # Toggle between play and stop
+            self.ids.play_toggle.state = 'down' if self.ids.play_toggle.state == 'normal' else 'normal'
 
     def set_backing_track(self, path):
         self.track = SoundLoader.load(path)
