@@ -43,6 +43,7 @@ RootBoxLayout:
     Label:
         id: file
         text: 'Background Track Player'  # Replace with filename
+        font_size: sp(20)
     BoxLayout:
         size_hint_y: None
         height: dp(48)
@@ -55,30 +56,40 @@ RootBoxLayout:
             on_state:
                 if self.state == 'down': root.play()
                 if self.state == 'normal': root.stop()
-    GridLayout:
-        size_hint_y: .3
-        cols: 2
-        LeftLabel:
-            text: 'Play:'
-        RightLabel:
-            text: 'CC#1 0'
-        LeftLabel:
-            text: 'Stop:'
-        RightLabel:
-            text: 'CC#1 127'
-        LeftLabel:
-            text: 'Restart:'
-        RightLabel:
-            text: 'CC#2 127'
-        LeftLabel:
-            text: 'Volume:'
-        RightLabel:
-            text: 'CC#3 0-127'
+        Spinner:
+            id: speed
+            text: 'Speed 1x'
+            values: ['Speed 0.5x', 'Speed 0.75x','Speed 1x', 'Speed 1.25x','Speed 1.5x']
+    # GridLayout:
+    #     size_hint_y: .4
+    #     cols: 2
+    #     LeftLabel:
+    #         text: 'Play:'
+    #     RightLabel:
+    #         text: 'CC#1 0'
+    #     LeftLabel:
+    #         text: 'Stop:'
+    #     RightLabel:
+    #         text: 'CC#1 127'
+    #     LeftLabel:
+    #         text: 'Restart:'
+    #     RightLabel:
+    #         text: 'CC#2 127'
+    #     LeftLabel:
+    #         text: 'Volume:'
+    #     RightLabel:
+    #         text: 'CC#3 0-127'
+    #     LeftLabel:
+    #         text: 'Speed:'
+    #     RightLabel:
+    #         text: 'CC#4 0/5/7/12/15  1x/0.5x/.75x/1.25x/1.5x'
     BoxLayout:
         size_hint_y: None
-        height: dp(48)
+        height: dp(24)
         Label:
-            text: 'Drop Backing-Track File in Window'
+            text: 'Drop File in Window'
+        Button:
+            text: 'Midi Commands'
         Label:
             text: 'Spacebar to Toggle Play/Stop'
 """
@@ -151,6 +162,9 @@ class BackingTrackPlayerApp(App):
     def build(self):
         self.title = 'Backing Track Player V1.0'
         self.use_kivy_settings = False
+        Window.minimum_width = 800
+        Window.minimum_height = 375
+        Window.size = 800, 375
         Window.bind(on_dropfile=self._dropfile_action)
         return Builder.load_string(kv)
 
