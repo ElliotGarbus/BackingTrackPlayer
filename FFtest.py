@@ -8,7 +8,7 @@ speeds = ['1.5', '1.25', '.75', '.5']
 
 
 def time_stretch(speed):
-    subprocess.run(f"ffmpeg -y -i fbg.mp3 -filter:a atempo={speed} output_{speed.replace('.', '')}.mp3",
+    subprocess.run(f"ffmpeg -y -i source.mp3 -filter:a atempo={speed} output_{speed.replace('.', '')}.mp3",
                    check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
