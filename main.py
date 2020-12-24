@@ -122,7 +122,7 @@ class RootBoxLayout(BoxLayout):
         if keycode[1] == 'spacebar':  # Toggle between play and stop
             self.ids.play_toggle.state = 'down' if self.ids.play_toggle.state == 'normal' else 'normal'
 
-    def set_backing_track(self, path):  # todo: set speed to 1x
+    def set_backing_track(self, path):
         self.ids.speed.text = 'Speed 1x'
         self.track = SoundLoader.load(path)
         if not self.track:
