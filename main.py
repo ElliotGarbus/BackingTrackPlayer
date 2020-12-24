@@ -122,6 +122,7 @@ class RootBoxLayout(BoxLayout):
             self.track_path = path
             self.ids.file.text = Path(path).stem
             self.track.loop = True
+            self.create_fast_slow(path)
 
     def play(self):
         try:
@@ -152,6 +153,19 @@ class RootBoxLayout(BoxLayout):
             self.track.volume = v/127
         except AttributeError:
             self.ids.file.text = self.error_msg
+
+    def create_fast_slow(self, fn):
+        print(f'create_fast_slow of {fn}')
+        # create dir; delete fast slow versions if different...
+        Path('speeds').mkdir(exist_ok=True)
+        # files are stored with _050, _075, _125, _150 appended to name
+        name = Path(fn).name  # filename with ext
+        files = Path('speeds').glob('*')
+        for f in files:
+            print(f)
+
+
+
 
 
 class BackingTrackPlayerApp(App):
