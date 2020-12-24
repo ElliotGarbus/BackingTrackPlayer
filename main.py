@@ -8,8 +8,12 @@ from kivy.clock import Clock
 from kivy.utils import platform
 
 from pathlib import Path
+import subprocess
 
 from midi_control import MidiControl
+
+# TODO: Update configstartup to ensure a clean start.  Preserve Window size
+# TODO: Create popup of Midi commands
 
 kv = """
 <LeftLabel@Label>:
@@ -58,8 +62,9 @@ RootBoxLayout:
                 if self.state == 'normal': root.stop()
         Spinner:
             id: speed
-            text: 'Speed 1x'
-            values: ['Speed 0.5x', 'Speed 0.75x','Speed 1x', 'Speed 1.25x','Speed 1.5x']
+            text: root.speeds[2] # 1x
+            values: root.speeds
+            on_text: root.set_file(self.text)
     # GridLayout:
     #     size_hint_y: .4
     #     cols: 2
@@ -97,11 +102,15 @@ RootBoxLayout:
 
 class RootBoxLayout(BoxLayout):
     error_msg = 'Invalid File or No File Selected'
+    speeds = ['Speed 0.5x', 'Speed 0.75x', 'Speed 1x', 'Speed 1.25x', 'Speed 1.5x']
+    time_stretched = ['Speed 0.5x', 'Speed 0.75x', 'Speed 1.25x', 'Speed 1.5x']
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.track = None
-        self.track_path = None  # holds the name of the track
+        self.track_path = None  # holds the name of the 1x speed track
+        self.track_stretched = None  # name of stretched track
+        self.time_stretch_processes = {}
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
@@ -113,7 +122,8 @@ class RootBoxLayout(BoxLayout):
         if keycode[1] == 'spacebar':  # Toggle between play and stop
             self.ids.play_toggle.state = 'down' if self.ids.play_toggle.state == 'normal' else 'normal'
 
-    def set_backing_track(self, path):
+    def set_backing_track(self, path):  # todo: set speed to 1x
+        self.ids.speed.text = 'Speed 1x'
         self.track = SoundLoader.load(path)
         if not self.track:
             self.ids.file.text = self.error_msg
@@ -122,7 +132,7 @@ class RootBoxLayout(BoxLayout):
             self.track_path = path
             self.ids.file.text = Path(path).stem
             self.track.loop = True
-            self.create_time_stretch(path)
+            self.time_stretch(path)
 
     def play(self):
         try:
@@ -154,23 +164,69 @@ class RootBoxLayout(BoxLayout):
         except AttributeError:
             self.ids.file.text = self.error_msg
 
-    def create_time_stretch(self, fn):
-        print(f'create_time_stretch of {fn}')
-        # create dir; delete old versions if different... todo: create a file cache
+    def time_stretch(self, fn):
+        # create dir; delete old versions if different...
         Path('speeds').mkdir(exist_ok=True)
         # files are stored with _050, _075, _125, _150 appended to name
-        stem = Path(fn).stem
-        files = Path('speeds').glob('*')
-        print(list(files))
-        for f in files:
-            if f.stem[-4] != stem:
+        p = Path(fn)
+        stem = p.stem
+        suffix = p.suffix
+        sp = Path('speeds')
+        for f in sp.glob('*'):
+            if f.stem[:-4] + suffix != p.name:
                 f.unlink()              # remove old files
-        id = ['_050', '_075', '_125', '_150']
+        ts_files = {stem + ext + suffix for ext in ['_050', '_075', '_125', '_150']}
+        disk_files = {f.name for f in sp.glob('*')}
+        if ts_files <= disk_files:
+            return  # use existing time stretch files
+        else:
+            self._generate_time_stretch(p, sp)  # input path, output path
 
+    def _generate_time_stretch(self, p, sp):
+        # p is the full input path, sp is the output path
+        speeds = ['0.50', '0.75', '1.50', '1.25']
+        self.time_stretch_processes.clear()
+        for i, speed in enumerate(speeds):
+            cmd = f'ffmpeg -y -i "{p}" -filter:a atempo={speed} "{sp / p.stem}_{speed.replace(".", "")}{p.suffix}"'
+            self.time_stretch_processes[self.time_stretched[i]] = subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
+                                                                                   stderr=subprocess.DEVNULL)
 
+    def set_file(self, text):
+        track_p = Path(self.track_path)
+        p = str(Path('speeds') / Path(track_p.stem))
+        suffix = track_p.suffix
+        file = {'Speed 0.5x': p + '_050' + suffix,
+                'Speed 0.75x': p + '_075' + suffix,
+                'Speed 1x': self.track_path,
+                'Speed 1.25x': p + '_125' + suffix,
+                'Speed 1.5x': p + '_150' + suffix}
+        self.stop()
+        # disable play button if track not yet generated
+        self.track_stretched = file[text]
+        if text in self.time_stretched and self.time_stretch_processes and \
+                self.time_stretch_processes[text].poll() is None:
+            self.ids.play_toggle.disabled = self.ids.speed.disabled = True
+            self.wait_for_time_stretch()
+        else:
+            self.continue_set_file()
 
+    def wait_for_time_stretch(self, *args):
+        text = self.ids.speed.text
+        if self.time_stretch_processes[text].poll() is None:
+            # self.tmp_text = self.ids.file.text
+            self.ids.file.text = 'Processing Time Stretch'
+            Clock.schedule_once(self.wait_for_time_stretch, .1)
+        else:
+            self.ids.file.text = Path(self.track_path).stem
+            self.continue_set_file()
 
-
+    def continue_set_file(self):
+        self.ids.play_toggle.disabled = self.ids.speed.disabled = False
+        self.track = SoundLoader.load(self.track_stretched)
+        if not self.track:
+            self.ids.file.text = self.error_msg
+        else:
+            self.track.loop = True
 
 
 class BackingTrackPlayerApp(App):
