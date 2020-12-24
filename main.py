@@ -122,7 +122,7 @@ class RootBoxLayout(BoxLayout):
             self.track_path = path
             self.ids.file.text = Path(path).stem
             self.track.loop = True
-            self.create_fast_slow(path)
+            self.create_time_stretch(path)
 
     def play(self):
         try:
@@ -154,15 +154,20 @@ class RootBoxLayout(BoxLayout):
         except AttributeError:
             self.ids.file.text = self.error_msg
 
-    def create_fast_slow(self, fn):
-        print(f'create_fast_slow of {fn}')
-        # create dir; delete fast slow versions if different...
+    def create_time_stretch(self, fn):
+        print(f'create_time_stretch of {fn}')
+        # create dir; delete old versions if different... todo: create a file cache
         Path('speeds').mkdir(exist_ok=True)
         # files are stored with _050, _075, _125, _150 appended to name
-        name = Path(fn).name  # filename with ext
+        stem = Path(fn).stem
         files = Path('speeds').glob('*')
+        print(list(files))
         for f in files:
-            print(f)
+            if f.stem[-4] != stem:
+                f.unlink()              # remove old files
+        id = ['_050', '_075', '_125', '_150']
+
+
 
 
 
@@ -191,8 +196,8 @@ class BackingTrackPlayerApp(App):
         m_input = self.config.getdefault('MIDI', 'input', 'None')
         ch = self.config.get('MIDI', 'channel')
         song = self.config.get('Track', 'song')
+        self.root.set_backing_track(song)  # before set midi ports - so errors can show in track area
         if m_input in names:
-            self.root.set_backing_track(song)  # before set midi ports - so errors can show in track area
             self.mc.set_midi_port(m_input)
             self.mc.midi_channel = int(ch)
             self.root.ids.midi_devices.text = m_input
@@ -215,10 +220,11 @@ class BackingTrackPlayerApp(App):
         return super().get_application_config(defaultpath=s)
 
     def on_stop(self):
-        if self.mc.midi_in_port and self.mc.midi_channel is not None and self.root.track_path:
-            self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
-            self.config.set('MIDI', 'channel', self.mc.midi_channel)
+        if self.root.track_path:
             self.config.set('Track', 'song', self.root.track_path)
+            if self.mc.midi_in_port and self.mc.midi_channel:
+                self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
+                self.config.set('MIDI', 'channel', self.mc.midi_channel)
             self.config.write()
 
 
