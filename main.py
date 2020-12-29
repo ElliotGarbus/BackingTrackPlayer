@@ -53,12 +53,12 @@ kv = """
             RightLabel:
                 text: '127'
             
-            LeftLabel:
-                text: 'Restart'
-            CCLabel:
-                text: 'CC# 2'
-            RightLabel:
-                text: '127, Same as Play'
+            # LeftLabel:
+            #     text: 'Restart'
+            # CCLabel:
+            #     text: 'CC# 2'
+            # RightLabel:
+            #     text: '127, Same as Play'
                 
             LeftLabel:
                 text: 'Volume'
@@ -253,6 +253,13 @@ class RootBoxLayout(BoxLayout):
             self.track.volume = v/127
         except AttributeError:
             self.ids.file.text = self.error_msg
+
+    def set_speed(self, value):
+        #  value from midi cc message : 1, 2, 3, 4, 5 for speeds  1x, 0.5x, .75x, 1.25x, 1.5x respectively
+        if value not in [1, 2, 3, 4, 5]:
+            return
+        m_speeds = ['Speed 1x', 'Speed 0.5x', 'Speed 0.75x', 'Speed 1.25x', 'Speed 1.5x']
+        self.ids.speed.text = m_speeds[value - 1]
 
     def time_stretch(self, fn):
         # create dir; delete old versions if different...

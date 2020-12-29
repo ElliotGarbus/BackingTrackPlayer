@@ -46,7 +46,7 @@ class MidiControl:
                             p.play()
                         elif msg.value == 127:
                             p.stop()
-                    elif msg.control == 2 and msg.value == 127:  # Restart
-                        p.restart()
                     elif msg.control == 3:  # Adjust playback volume
                         p.set_volume(msg.value)
+                    elif msg.control == 4:
+                        p.set_speed(msg.value)
