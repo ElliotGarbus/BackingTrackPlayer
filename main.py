@@ -7,6 +7,7 @@ from kivy.utils import platform
 
 from midi_control import MidiControl
 import playscreen
+import monitorscreen
 
 # TODO: Update configstartup to ensure a clean start.  Preserve Window size
 
@@ -104,10 +105,6 @@ kv = """
             width: dp(1)
             rectangle: (*self.pos, *self.size)
 
-<MidiMonitorScreen@Screen>:
-    Button:
-        text: 'midi monitor WIP'
-
 BoxLayout:
     orientation: 'vertical'
     BoxLayout:
@@ -130,7 +127,6 @@ BoxLayout:
             name: 'play_screen'
         MidiMonitorScreen:
             name: 'midi_monitor'
-
     BoxLayout:
         size_hint_y: None
         height: dp(48)
@@ -193,11 +189,13 @@ class BackingTrackPlayerApp(App):
         return super().get_application_config(defaultpath=s)
 
     def on_stop(self):
-        if self.root.track_path:
-            self.config.set('Track', 'song', self.root.track_path)
-            if self.mc.midi_in_port and self.mc.midi_channel:
-                self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
-                self.config.set('MIDI', 'channel', self.mc.midi_channel)
+        p = self.root.ids.sm.get_screen('play_screen').track_path
+        if p:
+            self.config.set('Track', 'song', p)
+            self.config.write()
+        if self.mc.midi_in_port and self.mc.midi_channel:
+            self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
+            self.config.set('MIDI', 'channel', self.mc.midi_channel)
             self.config.write()
 
 
