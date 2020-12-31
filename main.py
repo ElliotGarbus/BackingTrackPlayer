@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
 from kivy.utils import platform
+from kivy.uix.screenmanager import Screen
 
 from pathlib import Path
 import subprocess
@@ -13,7 +14,6 @@ import subprocess
 from midi_control import MidiControl
 
 # TODO: Update configstartup to ensure a clean start.  Preserve Window size
-# TODO: Create popup of Midi commands
 
 kv = """
 #:import Factory kivy.factory.Factory
@@ -53,13 +53,6 @@ kv = """
             RightLabel:
                 text: '127'
             
-            # LeftLabel:
-            #     text: 'Restart'
-            # CCLabel:
-            #     text: 'CC# 2'
-            # RightLabel:
-            #     text: '127, Same as Play'
-                
             LeftLabel:
                 text: 'Volume'
             CCLabel:
@@ -116,8 +109,45 @@ kv = """
             width: dp(1)
             rectangle: (*self.pos, *self.size)
 
+<PlayScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            id: file
+            text: 'Background Track Player'  # Replace with filename
+            font_size: sp(20)
+        BoxLayout:
+            size_hint_y: None
+            height: dp(48)
+            Button:
+                text: 'Restart'
+                on_release: root.restart()
+            ToggleButton:
+                id: play_toggle
+                text: {'normal': 'Play', 'down': 'Stop'} [self.state]
+                on_state:
+                    if self.state == 'down': root.play()
+                    if self.state == 'normal': root.stop()
+            Spinner:
+                id: speed
+                text: root.speeds[2]
+                values: root.speeds
+                on_text: root.set_file(self.text)
+        BoxLayout:
+            size_hint_y: None
+            height: dp(24)
+            Label:
+                text: 'Drop File in Window'
+            Label:
+                
+            Label:
+                text: 'Spacebar to Toggle Play/Stop'
 
-RootBoxLayout:
+<MidiMonitorScreen@Screen>:
+    Button:
+        text: 'midi monitor WIP'
+
+BoxLayout:
     orientation: 'vertical'
     BoxLayout:
         size_hint_y: None
@@ -133,64 +163,29 @@ RootBoxLayout:
             text: 'Select Midi Channel'
             values: [str(n) for n in range(1, 17)]
             on_text: app.mc.set_midi_channel(self.text)
-    Label:
-        id: file
-        text: 'Background Track Player'  # Replace with filename
-        font_size: sp(20)
+    ScreenManager:
+        id: sm
+        PlayScreen:
+            name: 'play_screen'
+        MidiMonitorScreen:
+            name: 'midi_monitor'
+
     BoxLayout:
         size_hint_y: None
         height: dp(48)
         Button:
-            text: 'Restart'
-            on_release: root.restart()
-        ToggleButton:
-            id: play_toggle
-            text: {'normal': 'Play', 'down': 'Stop'} [self.state]
-            on_state:
-                if self.state == 'down': root.play()
-                if self.state == 'normal': root.stop()
-        Spinner:
-            id: speed
-            text: root.speeds[2] # 1x
-            values: root.speeds
-            on_text: root.set_file(self.text)
-    # GridLayout:
-    #     size_hint_y: .4
-    #     cols: 2
-    #     LeftLabel:
-    #         text: 'Play:'
-    #     RightLabel:
-    #         text: 'CC#1 0'
-    #     LeftLabel:
-    #         text: 'Stop:'
-    #     RightLabel:
-    #         text: 'CC#1 127'
-    #     LeftLabel:
-    #         text: 'Restart:'
-    #     RightLabel:
-    #         text: 'CC#2 127'
-    #     LeftLabel:
-    #         text: 'Volume:'
-    #     RightLabel:
-    #         text: 'CC#3 0-127'
-    #     LeftLabel:
-    #         text: 'Speed:'
-    #     RightLabel:
-    #         text: 'CC#4 0/5/7/12/15  1x/0.5x/.75x/1.25x/1.5x'
-    BoxLayout:
-        size_hint_y: None
-        height: dp(24)
-        Label:
-            text: 'Drop File in Window'
+            text: 'Play Mode'
+            on_release: sm.current = 'play_screen'
         Button:
             text: 'Midi Commands'
             on_release: Factory.MidiCCPopup().open()
-        Label:
-            text: 'Spacebar to Toggle Play/Stop'
+        Button:
+            text: 'Midi Monitor'
+            on_release: sm.current = 'midi_monitor'
 """
 
 
-class RootBoxLayout(BoxLayout):
+class PlayScreen(Screen):
     error_msg = 'Invalid File or No File Selected'
     speeds = ['Speed 0.5x', 'Speed 0.75x', 'Speed 1x', 'Speed 1.25x', 'Speed 1.5x']
     time_stretched = ['Speed 0.5x', 'Speed 0.75x', 'Speed 1.25x', 'Speed 1.5x']
@@ -246,11 +241,11 @@ class RootBoxLayout(BoxLayout):
                 self.track.seek(0)
                 self.track.play()
         except AttributeError:
-            self.ids.file.text = self.error_msg
+            self.file.text = self.error_msg
 
     def set_volume(self, v):  # v is from 0 to 127
         try:
-            self.track.volume = v/127
+            self.track.volume = v / 127
         except AttributeError:
             self.ids.file.text = self.error_msg
 
@@ -271,7 +266,7 @@ class RootBoxLayout(BoxLayout):
         sp = Path('speeds')
         for f in sp.glob('*'):
             if f.stem[:-4] + suffix != p.name:
-                f.unlink()              # remove old files
+                f.unlink()  # remove old files
         ts_files = {stem + ext + suffix for ext in ['_050', '_075', '_125', '_150']}
         disk_files = {f.name for f in sp.glob('*')}
         if ts_files <= disk_files:
@@ -302,7 +297,7 @@ class RootBoxLayout(BoxLayout):
         self.track_stretched = file[text]
         if text in self.time_stretched and self.time_stretch_processes and \
                 self.time_stretch_processes[text].poll() is None:
-            self.ids.play_toggle.disabled = self.ids.speed.disabled = True
+            self.play_toggle.disabled = self.ids.speed.disabled = True
             self.wait_for_time_stretch()
         else:
             self.continue_set_file()
@@ -310,11 +305,11 @@ class RootBoxLayout(BoxLayout):
     def wait_for_time_stretch(self, *args):
         text = self.ids.speed.text
         if self.time_stretch_processes[text].poll() is None:
-            # self.tmp_text = self.ids.file.text
-            self.ids.file.text = 'Processing Time Stretch'
+            # self.tmp_text = self.ids.sm.get_screen('play_screen').ids.file.text
+            self.ids.sm.get_screen('play_screen').ids.file.text = 'Processing Time Stretch'
             Clock.schedule_once(self.wait_for_time_stretch, .1)
         else:
-            self.ids.file.text = Path(self.track_path).stem
+            self.ids.sm.get_screen('play_screen').ids.file.text = Path(self.track_path).stem
             self.continue_set_file()
 
     def continue_set_file(self):
@@ -349,7 +344,7 @@ class BackingTrackPlayerApp(App):
         m_input = self.config.getdefault('MIDI', 'input', 'None')
         ch = self.config.get('MIDI', 'channel')
         song = self.config.get('Track', 'song')
-        self.root.set_backing_track(song)  # before set midi ports - so errors can show in track area
+        self.root.ids.sm.get_screen('play_screen').set_backing_track(song)  # before set midi ports - so errors can show in track area
         if m_input in names:
             self.mc.set_midi_port(m_input)
             self.mc.midi_channel = int(ch)
