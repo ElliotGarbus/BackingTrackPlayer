@@ -37,9 +37,11 @@ class MidiControl:
 
     def read_midi_callback(self, _):  # called from Clock.schedule_interval, does not use dt
         app = App.get_running_app()
-        p = app.root
+        p = app.root.ids.sm.get_screen('play_screen')
         if self.midi_in_port:
             for msg in self.midi_in_port.iter_pending():
+                if app.root.ids.sm.current == 'midi_monitor':
+                    app.root.ids.sm.get_screen('midi_monitor').add_line(msg)
                 if msg.type == 'control_change' and msg.channel == self.midi_channel:
                     if msg.control == 1:  # play or stop
                         if msg.value == 0:

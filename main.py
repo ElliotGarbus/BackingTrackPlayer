@@ -156,7 +156,7 @@ class BackingTrackPlayerApp(App):
         Window.bind(on_dropfile=self._dropfile_action)
         return Builder.load_string(kv)
 
-    def _dropfile_action(self, window, path):
+    def _dropfile_action(self, _, path):
         self.root.set_backing_track(path.decode())
 
     def on_start(self):
@@ -165,7 +165,8 @@ class BackingTrackPlayerApp(App):
         m_input = self.config.getdefault('MIDI', 'input', 'None')
         ch = self.config.get('MIDI', 'channel')
         song = self.config.get('Track', 'song')
-        self.root.ids.sm.get_screen('play_screen').set_backing_track(song)  # before set midi ports - so errors can show in track area
+        self.root.ids.sm.get_screen('play_screen').set_backing_track(song)
+        # before set midi ports - so errors can show in track area
         if m_input in names:
             self.mc.set_midi_port(m_input)
             self.mc.midi_channel = int(ch)
