@@ -1,7 +1,11 @@
+from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.properties import ListProperty, StringProperty
+
+import re
+import mido
 
 
 Builder.load_string("""
@@ -9,9 +13,14 @@ Builder.load_string("""
     orientation: 'horizontal'
     size_hint: 1, None
     height: dp(12)
-    Button:
+    Label:
+        padding: 10, 0 
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
         text: root.raw
-    Button:
+        
+    Label:
         text: root.action
     
 <MidiMonitorScreen>:
@@ -25,6 +34,7 @@ Builder.load_string("""
             Label:
                 text: 'Action'
         RecycleView:
+            id: rv
             viewclass: 'MidiLine'
             data: root.rv_list
             scroll_type: ['bars','content']
@@ -33,7 +43,7 @@ Builder.load_string("""
             RecycleBoxLayout:
                 id: rbl
                 orientation: 'vertical'
-                size_hint: None, None
+                size_hint_y: None
                 default_size: None, dp(16)
                 default_size_hint: 1, None
                 height: self.minimum_height
@@ -41,14 +51,33 @@ Builder.load_string("""
 
 
 class MidiMonitorScreen(Screen):
-    rv_list = ListProperty([{'raw': 'Midi Message', 'action': 'Action'}])
+    rv_list = ListProperty()
 
     def add_line(self, msg):
-        print(msg)
-        print(f'Ch:{msg.channel + 1}, CC#{msg.control}, value: {msg.value}')
-        raw = f'Ch:{msg.channel + 1}, CC#{msg.control}, value: {msg.value}'
-        action = 'TBD'
+        re_search = re.compile('channel=(\d+)')
+        midi_string = mido.format_as_string(msg, include_time=False)
+        result = re_search.search(midi_string)
+        if result:
+            ch = int(result.group(1)) + 1
+            raw = re_search.sub(f'channel={ch}', midi_string)
+        else:
+            raw = midi_string
+        action = ''
+        app = App.get_running_app()
+        if msg.channel == int(app.root.ids.midi_ch.text) - 1 and \
+            msg.type == 'control_change' and msg.control in [1, 3, 4]:
+            if msg.control == 1:
+                if msg.value == 0:
+                    action = 'Play'
+                elif msg.value == 127:
+                    action = 'Stop'
+            elif msg.control == 3:
+                action = f'Volume: {int(msg.value/127 * 100)}%'
+            elif msg.control == 4 and msg.value in range(1,6):
+                speed_msg = ['', '1x', '0.5x', '.75x', '1.25x', '1.5x']
+                action = f'Speed Control {speed_msg[msg.value]}'
         self.rv_list.append({'raw': raw, 'action': action})
+        self.ids.rv.scroll_y = 0
 
 
 class MidiLine(BoxLayout):
