@@ -54,12 +54,12 @@ class MidiMonitorScreen(Screen):
     rv_list = ListProperty()
 
     def add_line(self, msg):
-        re_search = re.compile('channel=(\d+)')
+        re_search = re.compile(' channel=(\d+)')
         midi_string = mido.format_as_string(msg, include_time=False)
         result = re_search.search(midi_string)
         if result:
             ch = int(result.group(1)) + 1
-            raw = re_search.sub(f'channel={ch}', midi_string)
+            raw = re_search.sub(f' channel={ch}', midi_string)
         else:
             raw = midi_string
         action = ''
