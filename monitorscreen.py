@@ -59,9 +59,7 @@ class MidiMonitorScreen(Screen):
         result = re_search.search(midi_string)
         if result:
             ch = int(result.group(1)) + 1
-            raw = re_search.sub(f' channel={ch}', midi_string)
-        else:
-            raw = midi_string
+        raw = re_search.sub(f' channel={ch}', midi_string)
         action = ''
         app = App.get_running_app()
         if msg.channel == int(app.root.ids.midi_ch.text) - 1 and \
