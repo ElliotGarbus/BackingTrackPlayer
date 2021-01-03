@@ -158,16 +158,9 @@ class BackingTrackPlayerApp(App):
         return Builder.load_string(kv)
 
     def _dropfile_action(self, _, path):
-        self.root.set_backing_track(path.decode())
+        self.root.ids.sm.get_screen('play_screen').set_backing_track(path.decode())
 
     def on_start(self):
-        config = self.config
-        width =  config.getdefault('Window', 'width', window_width)
-        height = config.getdefault('Window', 'height', window_height)
-        Window.size = (int(width), int(height))
-        Window.top = int(float(config.getdefault('Window', 'top', window_top)))
-        Window.left = int(float(config.getdefault('Window', 'left', window_left)))
-
         names = self.mc.get_midi_ports()
         self.root.ids.midi_devices.values = names
         m_input = self.config.getdefault('MIDI', 'input', 'None')
@@ -211,13 +204,12 @@ class BackingTrackPlayerApp(App):
         self.config.write()
         return False
 
-
     def on_stop(self):
         p = self.root.ids.sm.get_screen('play_screen').track_path
         if p:
             self.config.set('Track', 'song', p)
             self.config.write()
-        if self.mc.midi_in_port and self.mc.midi_channel:
+        if self.mc.midi_in_port and self.mc.midi_channel is not None:
             self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
             self.config.set('MIDI', 'channel', self.mc.midi_channel)
             self.config.write()

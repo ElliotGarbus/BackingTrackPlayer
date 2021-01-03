@@ -1,8 +1,9 @@
 from kivy.utils import platform
 from kivy.config import Config
+from kivy.logger import Logger
 
-from configparser import ConfigParser
-import os.path
+import configparser
+from pathlib import Path
 
 """
 This code must be at the top of the 'main' executable file.  
@@ -16,13 +17,21 @@ window_top = 50
 window_left = 100
 
 if platform != 'macosx':
-    ini_file = os.path.join(os.getcwd(), 'backingtrackplayer.ini')
+    ini_file = Path.cwd() / 'backingtrackplayer.ini'    # os.path.join(os.getcwd(), 'backingtrackplayer.ini')
 else:
-    ini_file = os.path.expanduser('~/.backingtrackplayer.ini')
+    ini_file = Path.expanduser('~/.backingtrackplayer.ini')
 
 # Use Python lib configparser to read .ini file prior to app startup
-parser = ConfigParser()
-found = parser.read(ini_file)  # created in main.py: build_config()
+parser = configparser.ConfigParser()
+try:
+    found = parser.read(ini_file)  # created in main.py: build_config()
+except configparser.Error as e:
+    Logger.exception(f'Invalid Configuration File: {e}')
+    p = Path(ini_file)
+    if p.exists():
+        p.unlink()
+    found = False
+
 if found:
     Config.set('graphics', 'width', parser['Window']['width'])
     Config.set('graphics', 'height', parser['Window']['height'])
