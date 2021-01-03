@@ -3,6 +3,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.utils import platform
 
 from pathlib import Path
 import subprocess
@@ -136,12 +137,16 @@ class PlayScreen(Screen):
         # p is the full input path, sp is the output path
         speeds = ['0.50', '0.75', '1.50', '1.25']
         self.time_stretch_processes.clear()
+        cf = subprocess.CREATE_NO_WINDOW if platform == 'win' else 0  # no windows with Popen on Win10
         for i, speed in enumerate(speeds):
             cmd = f'ffmpeg -y -i "{p}" -filter:a atempo={speed} "{sp / p.stem}_{speed.replace(".", "")}{p.suffix}"'
-            self.time_stretch_processes[self.time_stretched[i]] = subprocess.Popen(cmd, stdout=subprocess.DEVNULL,
-                                                                                   stderr=subprocess.DEVNULL)
+            self.time_stretch_processes[self.time_stretched[i]] = \
+                subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL, creationflags=cf)
 
     def set_file(self, text):
+        if not self.track_path:
+            return
         track_p = Path(self.track_path)
         p = str(Path('speeds') / Path(track_p.stem))
         suffix = track_p.suffix
@@ -163,7 +168,6 @@ class PlayScreen(Screen):
     def wait_for_time_stretch(self, *args):
         text = self.ids.speed.text
         if self.time_stretch_processes[text].poll() is None:
-            # self.tmp_text = self.ids.sm.get_screen('play_screen').ids.file.text
             self.ids.sm.get_screen('play_screen').ids.file.text = 'Processing Time Stretch'
             Clock.schedule_once(self.wait_for_time_stretch, .1)
         else:

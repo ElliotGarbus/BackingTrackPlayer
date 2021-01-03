@@ -10,7 +10,7 @@ win_icon = '../icons8_refresh_64_icon.ico'
 
 a = Analysis(['../main.py'],
              pathex=[spec_root],
-             datas=[],
+             datas=[('../ffmpeg.exe', '.'), ('../*.png', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
