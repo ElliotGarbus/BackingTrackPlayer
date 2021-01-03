@@ -1,15 +1,15 @@
-import configstartup
+from configstartup import window_width, window_top, window_left, window_height
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.utils import platform
+from kivy.metrics import Metrics
 
 from midi_control import MidiControl
 import playscreen
 import monitorscreen
 
-# TODO: Update configstartup to ensure a clean start.  Preserve Window size
 
 kv = """
 #:import Factory kivy.factory.Factory
@@ -137,7 +137,7 @@ BoxLayout:
             text: 'Midi Commands'
             on_release: Factory.MidiCCPopup().open()
         Button:
-            text: 'Midi Monitor'
+            text: 'Midi Monitor Mode'
             on_release: sm.current = 'midi_monitor'
 """
 
@@ -150,16 +150,24 @@ class BackingTrackPlayerApp(App):
     def build(self):
         self.title = 'Backing Track Player V1.0'
         self.use_kivy_settings = False
-        Window.minimum_width = 800
-        Window.minimum_height = 375
-        Window.size = 800, 375
+        Window.minimum_width = window_width
+        Window.minimum_height = window_height
+        # Window.size = 800, 375
         Window.bind(on_dropfile=self._dropfile_action)
+        Window.bind(on_request_close=self.window_request_close)
         return Builder.load_string(kv)
 
     def _dropfile_action(self, _, path):
         self.root.set_backing_track(path.decode())
 
     def on_start(self):
+        config = self.config
+        width =  config.getdefault('Window', 'width', window_width)
+        height = config.getdefault('Window', 'height', window_height)
+        Window.size = (int(width), int(height))
+        Window.top = int(float(config.getdefault('Window', 'top', window_top)))
+        Window.left = int(float(config.getdefault('Window', 'left', window_left)))
+
         names = self.mc.get_midi_ports()
         self.root.ids.midi_devices.values = names
         m_input = self.config.getdefault('MIDI', 'input', 'None')
@@ -181,6 +189,10 @@ class BackingTrackPlayerApp(App):
         config.setdefaults('MIDI', {'input': 'None',
                                     'channel': 'None'})
         config.setdefaults('Track', {'song': 'None'})
+        config.setdefaults('Window', {'width': window_width,
+                                      'height': window_height,
+                                      'top': window_top,
+                                      'left': window_left})
 
     def get_application_config(self, defaultpath='%(appdir)s/%(appname)s.ini'):
         if platform == 'macosx':  # mac will not write into app folder
@@ -188,6 +200,17 @@ class BackingTrackPlayerApp(App):
         else:
             s = defaultpath
         return super().get_application_config(defaultpath=s)
+
+    def window_request_close(self, win):
+        # Window.size is automatically adjusted for density, must divide by density when saving size
+        config = self.config
+        config.set('Window', 'width', int(Window.size[0]/Metrics.density))
+        config.set('Window', 'height', int(Window.size[1]/Metrics.density))
+        config.set('Window', 'top', Window.top)
+        config.set('Window', 'left', Window.left)
+        self.config.write()
+        return False
+
 
     def on_stop(self):
         p = self.root.ids.sm.get_screen('play_screen').track_path

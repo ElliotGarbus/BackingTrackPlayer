@@ -15,6 +15,10 @@ Builder.load_string("""
             id: file
             text: 'Background Track Player'  # Replace with filename
             font_size: sp(20)
+        Label:
+            size_hint_y: None
+            height: dp(24)
+            text: 'Drop File in Window'
         BoxLayout:
             size_hint_y: None
             height: dp(48)
@@ -32,15 +36,10 @@ Builder.load_string("""
                 text: root.speeds[2]
                 values: root.speeds
                 on_text: root.set_file(self.text)
-        BoxLayout:
+        Label:
             size_hint_y: None
             height: dp(24)
-            Label:
-                text: 'Drop File in Window'
-            Label:
-                
-            Label:
-                text: 'Spacebar to Toggle Play/Stop'
+            text: 'Spacebar to Toggle Play/Stop'
 """)
 
 

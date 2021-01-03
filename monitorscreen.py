@@ -21,6 +21,10 @@ Builder.load_string("""
         text: root.raw
         
     Label:
+        padding: 10, 0 
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
         text: root.action
     
 <MidiMonitorScreen>:
@@ -32,6 +36,10 @@ Builder.load_string("""
             Label:
                 text: 'MIDI Message'
             Label:
+                padding: 20, 0
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
                 text: 'Action'
         RecycleView:
             id: rv
@@ -44,7 +52,7 @@ Builder.load_string("""
                 id: rbl
                 orientation: 'vertical'
                 size_hint_y: None
-                default_size: None, dp(16)
+                default_size: None, dp(22)
                 default_size_hint: 1, None
                 height: self.minimum_height
 """)
