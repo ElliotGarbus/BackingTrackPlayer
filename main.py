@@ -190,6 +190,8 @@ class BackingTrackPlayerApp(App):
     def get_application_config(self, defaultpath='%(appdir)s/%(appname)s.ini'):
         if platform == 'macosx':  # mac will not write into app folder
             s = '~/.%(appname)s.ini'
+        elif platform == 'win':
+            s = self.user_data_dir + '/%(appname)s.ini'  # puts ini in AppData
         else:
             s = defaultpath
         return super().get_application_config(defaultpath=s)

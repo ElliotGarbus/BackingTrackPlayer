@@ -4,6 +4,7 @@ from kivy.logger import Logger
 
 import configparser
 from pathlib import Path
+import os
 
 """
 This code must be at the top of the 'main' executable file.  
@@ -17,7 +18,7 @@ window_top = 50
 window_left = 100
 
 if platform != 'macosx':
-    ini_file = Path.cwd() / 'backingtrackplayer.ini'    # os.path.join(os.getcwd(), 'backingtrackplayer.ini')
+    ini_file = Path(os.environ['APPDATA']) / Path('backingtrackplayer') /'backingtrackplayer.ini'
 else:
     ini_file = Path.expanduser('~/.backingtrackplayer.ini')
 
