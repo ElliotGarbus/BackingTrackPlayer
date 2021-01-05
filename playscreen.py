@@ -150,7 +150,8 @@ class PlayScreen(Screen):
         if not self.track_path:
             return
         track_p = Path(self.track_path)
-        p = str(Path('speeds') / Path(track_p.stem))
+        app = App.get_running_app()
+        p = str(Path(app.user_data_dir) / Path('speeds') / track_p.stem)
         suffix = track_p.suffix
         file = {'Speed 0.5x': p + '_050' + suffix,
                 'Speed 0.75x': p + '_075' + suffix,
