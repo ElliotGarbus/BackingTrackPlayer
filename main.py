@@ -71,7 +71,7 @@ kv = """
 
 <LeftLabel@Label>:
     size_hint_x: None
-    width: 75
+    width: dp(75)
     # text_size: self.size
     # halign: 'right'
     # valign: 'center' 
@@ -85,7 +85,7 @@ kv = """
     
 <CCLabel@Label>:
     size_hint_x: None
-    width: 60
+    width: dp(60)
     canvas:
         Color:
             rgb: 1, 1, 1
