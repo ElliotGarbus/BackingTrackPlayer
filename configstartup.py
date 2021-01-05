@@ -20,7 +20,7 @@ window_left = 100
 if platform != 'macosx':
     ini_file = Path(os.environ['APPDATA']) / Path('backingtrackplayer') /'backingtrackplayer.ini'
 else:
-    ini_file = Path.expanduser('~/.backingtrackplayer.ini')
+    ini_file = Path('~/.backingtrackplayer.ini').expanduser()
 
 # Use Python lib configparser to read .ini file prior to app startup
 parser = configparser.ConfigParser()
