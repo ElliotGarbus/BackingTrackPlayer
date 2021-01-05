@@ -1,3 +1,4 @@
+from kivy.app import App
 from kivy.core.audio import SoundLoader
 from kivy.uix.screenmanager import Screen
 from kivy.core.window import Window
@@ -117,21 +118,22 @@ class PlayScreen(Screen):
 
     def time_stretch(self, fn):
         # create dir; delete old versions if different...
-        Path('speeds').mkdir(exist_ok=True)
+        app = App.get_running_app()
+        speed_dir = Path(app.user_data_dir) / 'speeds'
+        speed_dir.mkdir(exist_ok=True)
         # files are stored with _050, _075, _125, _150 appended to name
         p = Path(fn)
         stem = p.stem
         suffix = p.suffix
-        sp = Path('speeds')
-        for f in sp.glob('*'):
+        for f in speed_dir.glob('*'):
             if f.stem[:-4] + suffix != p.name:
                 f.unlink()  # remove old files
         ts_files = {stem + ext + suffix for ext in ['_050', '_075', '_125', '_150']}
-        disk_files = {f.name for f in sp.glob('*')}
+        disk_files = {f.name for f in speed_dir.glob('*')}
         if ts_files <= disk_files:
             return  # use existing time stretch files
         else:
-            self._generate_time_stretch(p, sp)  # input path, output path
+            self._generate_time_stretch(p, speed_dir)  # input path, output path
 
     def _generate_time_stretch(self, p, sp):
         # p is the full input path, sp is the output path
