@@ -17,10 +17,10 @@ window_height = 375
 window_top = 50
 window_left = 100
 
-if platform != 'macosx':
-    ini_file = Path(os.environ['APPDATA']) / Path('backingtrackplayer') /'backingtrackplayer.ini'
-else:
-    ini_file = Path('~/.backingtrackplayer.ini').expanduser()
+if platform == 'win':
+    ini_file = Path(os.environ['APPDATA']) / Path('backingtrackplayer') / 'backingtrackplayer.ini'
+else:  # macosx
+    ini_file = Path('~/Library/Application Support/backingtrackplayer/backingtrackplayer.ini').expanduser()
 
 # Use Python lib configparser to read .ini file prior to app startup
 parser = configparser.ConfigParser()
@@ -52,4 +52,3 @@ else:
     Config.set('kivy', 'window_icon', 'icons8-refresh-64.png')  # Windows uses a small png
 Config.set('kivy', 'exit_on_escape', 0)
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
-

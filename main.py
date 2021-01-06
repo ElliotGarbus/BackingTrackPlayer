@@ -188,15 +188,13 @@ class BackingTrackPlayerApp(App):
                                       'left': window_left})
 
     def get_application_config(self, defaultpath='%(appdir)s/%(appname)s.ini'):
-        if platform == 'macosx':  # mac will not write into app folder
-            s = '~/.%(appname)s.ini'
-        elif platform == 'win':
-            s = self.user_data_dir + '/%(appname)s.ini'  # puts ini in AppData
+        if platform == 'win' or platform == 'macosx':    # mac will not write into app folder
+            s = self.user_data_dir + '/%(appname)s.ini'  # puts ini in AppData on Windows
         else:
             s = defaultpath
         return super().get_application_config(defaultpath=s)
 
-    def window_request_close(self, win):
+    def window_request_close(self, _):
         # Window.size is automatically adjusted for density, must divide by density when saving size
         config = self.config
         config.set('Window', 'width', int(Window.size[0]/Metrics.density))
