@@ -164,7 +164,7 @@ class PlayScreen(Screen):
         self.track_stretched = file[text]
         if text in self.time_stretched and self.time_stretch_processes and \
                 self.time_stretch_processes[text].poll() is None:
-            self.play_toggle.disabled = self.ids.speed.disabled = True
+            self.ids.play_toggle.disabled = self.ids.speed.disabled = True
             self.wait_for_time_stretch()
         else:
             self.continue_set_file()
@@ -172,10 +172,10 @@ class PlayScreen(Screen):
     def wait_for_time_stretch(self, *args):
         text = self.ids.speed.text
         if self.time_stretch_processes[text].poll() is None:
-            self.ids.sm.get_screen('play_screen').ids.file.text = 'Processing Time Stretch'
+            self.ids.file.text = 'Processing Time Stretch'
             Clock.schedule_once(self.wait_for_time_stretch, .1)
         else:
-            self.ids.sm.get_screen('play_screen').ids.file.text = Path(self.track_path).stem
+            self.ids.file.text = Path(self.track_path).stem
             self.continue_set_file()
 
     def continue_set_file(self):
