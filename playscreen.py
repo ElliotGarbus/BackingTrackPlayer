@@ -8,6 +8,7 @@ from kivy.utils import platform
 
 from pathlib import Path
 import subprocess
+import shlex
 
 Builder.load_string("""
 <PlayScreen>:
@@ -141,9 +142,9 @@ class PlayScreen(Screen):
         self.time_stretch_processes.clear()
         cf = subprocess.CREATE_NO_WINDOW if platform == 'win' else 0  # no windows with Popen on Win10
         for i, speed in enumerate(speeds):
-            cmd = f'ffmpeg -y -i "{p}" -filter:a atempo={speed} "{sp / p.stem}_{speed.replace(".", "")}{p.suffix}"'
+            cmd = f'./ffmpeg -y -i "{p}" -filter:a atempo={speed} "{sp / p.stem}_{speed.replace(".", "")}{p.suffix}"'
             self.time_stretch_processes[self.time_stretched[i]] = \
-                subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                subprocess.Popen(shlex.split(cmd), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                  stderr=subprocess.DEVNULL, creationflags=cf)
 
     def set_file(self, text):
