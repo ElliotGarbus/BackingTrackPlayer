@@ -7,6 +7,7 @@ from kivy.utils import platform
 from kivy.metrics import Metrics
 
 from midi_control import MidiControl
+from pathlib import Path
 import playscreen
 import monitorscreen
 
@@ -166,6 +167,8 @@ class BackingTrackPlayerApp(App):
         m_input = self.config.getdefault('MIDI', 'input', 'None')
         ch = self.config.get('MIDI', 'channel')
         song = self.config.get('Track', 'song')
+        if not Path(song).exists():     # if track that was in config file was no longer exists...
+            song = 'None'
         self.root.ids.sm.get_screen('play_screen').set_backing_track(song)
         # before set midi ports - so errors can show in track area
         if m_input in names:
