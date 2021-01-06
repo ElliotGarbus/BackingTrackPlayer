@@ -194,7 +194,7 @@ class BackingTrackPlayerApp(App):
             s = defaultpath
         return super().get_application_config(defaultpath=s)
 
-    def window_request_close(self, win):
+    def window_request_close(self, _):
         # Window.size is automatically adjusted for density, must divide by density when saving size
         config = self.config
         config.set('Window', 'width', int(Window.size[0]/Metrics.density))

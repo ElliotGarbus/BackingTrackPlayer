@@ -18,7 +18,7 @@ window_top = 50
 window_left = 100
 
 if platform == 'win':
-    ini_file = Path(os.environ['APPDATA']) / Path('backingtrackplayer') /'backingtrackplayer.ini'
+    ini_file = Path(os.environ['APPDATA']) / Path('backingtrackplayer') / 'backingtrackplayer.ini'
 else:  # macosx
     ini_file = Path('~/Library/Application Support/backingtrackplayer/backingtrackplayer.ini').expanduser()
 
@@ -52,4 +52,3 @@ else:
     Config.set('kivy', 'window_icon', 'icons8-refresh-64.png')  # Windows uses a small png
 Config.set('kivy', 'exit_on_escape', 0)
 Config.set('input', 'mouse', 'mouse,disable_multitouch')
-
