@@ -4,15 +4,14 @@ import os
 
 spec_root = os.path.abspath(SPECPATH)
 block_cipher = None
-app_name = 'Matthews Effects Editor'
-mac_icon = '../Images/ME-APP-Design-Icon_512.icns'
+app_name = 'Backing Track Player'
+mac_icon = '../icons8-refresh-512.icns'
 
 
 a = Analysis(['../main.py'],
              pathex=[spec_root],
              binaries=[],
-             datas=[('../*.kv', '.'),
-                    ('../Images/*.png', './Images')],
+             datas=[('../ffmpeg', '.'), ('../*.png', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
