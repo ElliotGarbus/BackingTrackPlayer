@@ -21,3 +21,5 @@ Volume|3| 0-127
 
 Play and Stop use CC#1 to make it easy to set up a midi toggle switch to stop/start.
 Audio loops by default.
+
+The app uses kivy for the UI, mido for MIDI, and ffmpeg for time-stretching the audio.
