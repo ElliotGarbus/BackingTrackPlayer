@@ -16,8 +16,10 @@ Action | CC# | CC Value
 -------|-----|---------
 Play | 1 | 00
 Stop | 1 | 127
-Restart|2 |127
 Volume|3| 0-127
+Speed|4|1, 2, 3, 4, 5 for speeds  1x, 0.5x, .75x, 1.25x, 1.5x respectively
 
 Play and Stop use CC#1 to make it easy to set up a midi toggle switch to stop/start.
-Audio loops by default.
+The audio loops by default.
+
+The app uses kivy for the UI, mido for MIDI, and ffmpeg for time-stretching the audio.
