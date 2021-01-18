@@ -31,7 +31,8 @@ class MidiControl:
         except (RuntimeError, OSError) as e:
             Logger.exception(f'APPLICATION: set_midi_port(): {e}')
             app = App.get_running_app()
-            app.root.ids.sm.get_screen('play_screen').ids.file.text = 'Error: Cannot connect to MIDI.  Close and Restart.'
+            app.root.ids.sm.get_screen('play_screen').ids.file.text = \
+                'Error: Cannot connect to MIDI.  Close and Restart.'
 
     def set_midi_channel(self, ch: str):
         self.midi_channel = int(ch) - 1
