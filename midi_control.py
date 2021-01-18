@@ -1,6 +1,7 @@
 import mido
 import mido.backends.rtmidi  # required for pyinstaller to create an exe
 from kivy.app import App
+from kivy.logger import Logger
 
 
 class MidiControl:
@@ -13,7 +14,7 @@ class MidiControl:
         try:
             self.midi_in_names = mido.get_input_names()
         except RuntimeError as e:
-            print(f'APPLICATION: get_midi_ports(): {e}')
+            Logger.exception(f'APPLICATION: get_midi_ports(): {e}')
             self.midi_in_names = None
         return self.midi_in_names
 
@@ -28,9 +29,9 @@ class MidiControl:
         try:
             self.midi_in_port = mido.open_input(input_port)
         except (RuntimeError, OSError) as e:
-            print(f'APPLICATION: set_midi_port(): {e}')
+            Logger.exception(f'APPLICATION: set_midi_port(): {e}')
             app = App.get_running_app()
-            app.root.ids.file.text = 'Error: Cannot connect to MIDI'
+            app.root.ids.sm.get_screen('play_screen').ids.file.text = 'Error: Cannot connect to MIDI.  Close and Restart.'
 
     def set_midi_channel(self, ch: str):
         self.midi_channel = int(ch) - 1
