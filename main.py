@@ -149,7 +149,7 @@ class BackingTrackPlayerApp(App):
         self.mc = MidiControl()
 
     def build(self):
-        self.title = 'Backing Track Player V1.0'
+        self.title = 'Backing Track Player V1.01'
         self.use_kivy_settings = False
         Window.minimum_width = window_width
         Window.minimum_height = window_height
