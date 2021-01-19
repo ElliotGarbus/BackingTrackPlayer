@@ -74,8 +74,11 @@ class MidiMonitorScreen(Screen):
         app = App.get_running_app()
         if msg.type == 'sysex':
             raw = 'SYSEX Message'
-        if msg.type == 'control_change' and msg.channel == int(app.root.ids.midi_ch.text) - 1 and \
-             msg.control in [1, 3, 4]:
+        try:
+            midi_ch = int(app.root.ids.midi_ch.text) - 1
+        except ValueError:
+            midi_ch = -1  # if the channel has not been set, the int() conversion will fail
+        if msg.type == 'control_change' and msg.channel == midi_ch and msg.control in [1, 3, 4]:
             if msg.control == 1:
                 if msg.value == 0:
                     action = 'Play'
