@@ -1,5 +1,6 @@
 # BackingTrackPlayer
 A simple midi controlled audio player designed for playing backing tracks for practice
+Release builds for Windows10 and Mac on Release Page: https://github.com/ElliotGarbus/BackingTrackPlayer/releases
 
 **Directions:**
 
