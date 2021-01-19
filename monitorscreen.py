@@ -67,11 +67,16 @@ class MidiMonitorScreen(Screen):
         result = re_search.search(midi_string)
         if result:
             ch = int(result.group(1)) + 1
-        raw = re_search.sub(f' channel={ch}', midi_string)
+            raw = re_search.sub(f' channel={ch}', midi_string)
+        else:
+            raw = midi_string
         action = ''
         app = App.get_running_app()
-        if msg.channel == int(app.root.ids.midi_ch.text) - 1 and \
-            msg.type == 'control_change' and msg.control in [1, 3, 4]:
+        # try:
+        if msg.type == 'sysex':
+            raw = 'SYSEX Message'
+        if msg.type == 'control_change' and msg.channel == int(app.root.ids.midi_ch.text) - 1 and \
+             msg.control in [1, 3, 4]:
             if msg.control == 1:
                 if msg.value == 0:
                     action = 'Play'
@@ -82,6 +87,8 @@ class MidiMonitorScreen(Screen):
             elif msg.control == 4 and msg.value in range(1,6):
                 speed_msg = ['', '1x', '0.5x', '.75x', '1.25x', '1.5x']
                 action = f'Speed Control {speed_msg[msg.value]}'
+        # except AttributeError as e:
+        #     pass
         self.rv_list.append({'raw': raw, 'action': action})
         self.ids.rv.scroll_y = 0
 
