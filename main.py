@@ -5,6 +5,7 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.utils import platform
 from kivy.metrics import Metrics
+from kivy.properties import ListProperty
 
 from midi_control import MidiControl
 from pathlib import Path
@@ -122,6 +123,14 @@ BoxLayout:
             text: 'Select Midi Channel'
             values: [str(n) for n in range(1, 17)]
             on_text: app.mc.set_midi_channel(self.text)
+    Spinner:
+        id: recent
+        size_hint_y: None
+        height: 48
+        text: 'Recent Tracks'
+        values: app.recent_track_names
+        on_text: app.select_recent_track(self.text)
+        
     ScreenManager:
         id: sm
         PlayScreen:
@@ -144,12 +153,15 @@ BoxLayout:
 
 
 class BackingTrackPlayerApp(App):
+    recent_track_names = ListProperty()  # used to display names in most recent spinner
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.mc = MidiControl()
+        self.recent_track_paths = []  # holds full path to the track
 
     def build(self):
-        self.title = 'Backing Track Player V1.01'
+        self.title = 'Backing Track Player V1.1'  # 1.1 added recent track list
         self.use_kivy_settings = False
         Window.minimum_width = window_width
         Window.minimum_height = window_height
@@ -160,6 +172,22 @@ class BackingTrackPlayerApp(App):
 
     def _dropfile_action(self, _, path):
         self.root.ids.sm.get_screen('play_screen').set_backing_track(path.decode())
+        self.add_recent(path.decode())
+
+    def add_recent(self, path):
+        self.recent_track_paths.insert(0, path)
+        if len(self.recent_track_paths) > 5:
+            self.recent_track_paths = self.recent_track_paths[:5]
+        self.recent_track_names = [Path(p).stem for p in self.recent_track_paths]
+
+    def select_recent_track(self, track):
+        if track == 'Recent Tracks':
+            return
+        self.root.ids.sm.get_screen('play_screen').stop()
+        i = self.recent_track_names.index(track)
+        p = self.recent_track_paths[i]
+        self.root.ids.sm.get_screen('play_screen').set_backing_track(p)
+        self.root.ids.recent.text = 'Recent Tracks'
 
     def on_start(self):
         names = self.mc.get_midi_ports()
@@ -170,6 +198,9 @@ class BackingTrackPlayerApp(App):
         if not Path(song).exists():     # if track that was in config file was no longer exists...
             song = 'None'
         self.root.ids.sm.get_screen('play_screen').set_backing_track(song)
+        self.recent_track_paths = [t for t in self.config.get('Recent Tracks','tracks').split(',') if t]
+        self.recent_track_names = [Path(p).stem for p in self.recent_track_paths]
+
         # before set midi ports - so errors can show in track area
         if m_input in names:
             self.mc.set_midi_port(m_input)
@@ -189,6 +220,7 @@ class BackingTrackPlayerApp(App):
                                       'height': window_height,
                                       'top': window_top,
                                       'left': window_left})
+        config.setdefaults('Recent Tracks', {'tracks': ''})
 
     def get_application_config(self, defaultpath='%(appdir)s/%(appname)s.ini'):
         if platform == 'win' or platform == 'macosx':    # mac will not write into app folder
@@ -211,6 +243,8 @@ class BackingTrackPlayerApp(App):
         p = self.root.ids.sm.get_screen('play_screen').track_path
         if p:
             self.config.set('Track', 'song', p)
+            tracks = ','.join(self.recent_track_paths)
+            self.config.set('Recent Tracks', 'tracks', tracks)
             self.config.write()
         if self.mc.midi_in_port and self.mc.midi_channel is not None:
             self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
