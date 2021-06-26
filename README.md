@@ -1,6 +1,8 @@
 # BackingTrackPlayer
 A simple midi controlled audio player designed for playing backing tracks for practice
 
+Release builds for Windows10 and Mac on Release Page: https://github.com/ElliotGarbus/BackingTrackPlayer/releases
+
 **Directions:**
 
 Drag the backing track file you would like to play onto the app. The file name will be displayed in the center.
