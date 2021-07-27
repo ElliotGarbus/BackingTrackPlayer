@@ -126,9 +126,7 @@ class PlayScreen(Screen):
         p = Path(fn)
         stem = p.stem
         suffix = p.suffix
-        for f in speed_dir.glob('*'):
-            if f.stem[:-4] + suffix != p.name:
-                f.unlink()  # remove old files
+        # files not related to the current track are deleted in on_stop
         ts_files = {stem + ext + suffix for ext in ['_050', '_075', '_125', '_150']}
         disk_files = {f.name for f in speed_dir.glob('*')}
         if ts_files <= disk_files:

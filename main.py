@@ -9,6 +9,7 @@ from kivy.properties import ListProperty
 
 from midi_control import MidiControl
 from pathlib import Path
+import functools
 import playscreen
 import monitorscreen
 
@@ -161,7 +162,9 @@ class BackingTrackPlayerApp(App):
         self.recent_track_paths = []  # holds full path to the track
 
     def build(self):
-        self.title = 'Backing Track Player V1.1'  # 1.1 added recent track list
+        self.title = 'Backing Track Player V1.11'
+        # 1.1 added recent track list
+        # 1.11 improved responsiveness of recent tracks button
         self.use_kivy_settings = False
         Window.minimum_width = window_width
         Window.minimum_height = window_height
@@ -183,11 +186,17 @@ class BackingTrackPlayerApp(App):
     def select_recent_track(self, track):
         if track == 'Recent Tracks':
             return
+        self.root.ids.recent.text = 'Recent Tracks'
+        self.root.ids.sm.get_screen('play_screen').ids.file.text = Path(track).stem
+        pm = functools.partial(self.continue_select_recent_track, track)
+        Clock.schedule_once(pm, .5)  # allow the recent tracks spinner to update
+
+    def continue_select_recent_track(self, track, *args):
         self.root.ids.sm.get_screen('play_screen').stop()
         i = self.recent_track_names.index(track)
         p = self.recent_track_paths[i]
         self.root.ids.sm.get_screen('play_screen').set_backing_track(p)
-        self.root.ids.recent.text = 'Recent Tracks'
+
 
     def on_start(self):
         names = self.mc.get_midi_ports()
@@ -241,6 +250,7 @@ class BackingTrackPlayerApp(App):
 
     def on_stop(self):
         p = self.root.ids.sm.get_screen('play_screen').track_path
+        # update config file
         if p:
             self.config.set('Track', 'song', p)
             tracks = ','.join(self.recent_track_paths)
@@ -250,6 +260,14 @@ class BackingTrackPlayerApp(App):
             self.config.set('MIDI', 'input', self.mc.midi_in_port.name)
             self.config.set('MIDI', 'channel', self.mc.midi_channel)
             self.config.write()
+        # clean up old files
+        if p:
+            fn = Path(p)
+            suffix = fn.suffix
+            speed_dir = Path(self.user_data_dir) / 'speeds'
+            for f in speed_dir.glob('*'):
+                if f.stem[:-4] + suffix != fn.name:
+                    f.unlink()  # remove files not related to current track
 
 
 BackingTrackPlayerApp().run()
